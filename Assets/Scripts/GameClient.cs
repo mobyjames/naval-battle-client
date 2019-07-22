@@ -16,7 +16,7 @@ public class GameClient : GenericSingleton<GameClient>
 
     private Client client;
     private Room<State> room;
-
+    private bool initialStateReceived = false;
 
     void OnDestroy()
     {
@@ -25,7 +25,8 @@ public class GameClient : GenericSingleton<GameClient>
 
     private void OnApplicationQuit()
     {
-        Destroy(this);
+        if (room != null) room.Leave();
+        if (client != null) client.Close();
     }
 
     public void Connect()
@@ -83,18 +84,21 @@ public class GameClient : GenericSingleton<GameClient>
 
     void OnRoomStateChangeHandler(object sender, StateChangeEventArgs<State> e)
     {
-        if (e.IsFirstState)
+        if (e.IsFirstState && !initialStateReceived)
         {
-            Debug.Log("Received initial state");
+            Debug.Log("Received initial state " + e.State.phase);
+            initialStateReceived = true;
             OnInitialState?.Invoke(this, e.State);
         }
     }
 
     void OnStateChangeHandler(object sender, OnChangeEventArgs e)
     {
+        if (!initialStateReceived) return;
+
         foreach (var change in e.Changes)
         {
-            Debug.Log(change.Field + " changed");
+            Debug.Log(change.Field + " changed to " + change.Value);
         }
     }
 
