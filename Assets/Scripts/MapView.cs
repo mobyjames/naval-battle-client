@@ -5,7 +5,8 @@ using UnityEngine.Tilemaps;
 
 public enum ShipType
 {
-    Scout = 0,
+    None = 0,
+    Scout,
     Cruiser,
     Carrier
 }
@@ -15,6 +16,7 @@ public class MapView : MonoBehaviour
     public GameSceneController controller;
     public Tilemap cursorLayer;
     public Tilemap fleetLayer;
+    public Tilemap debugLayer;
 	public Tile[] cursorTiles;
     public Tile cursorTile;
     public int size = 8;
@@ -25,14 +27,12 @@ public class MapView : MonoBehaviour
     private Vector3Int minCoordinate;
     private Vector3Int maxCoordinate;
 
-    // Start is called before the first frame update
     void Start()
     {
         grid = GetComponent<Grid>();
 		SetPlacementMode();
     }
 
-    // Update is called once per frame
     void Update()
     {
 		if (mode == "disabled") return;
@@ -57,6 +57,10 @@ public class MapView : MonoBehaviour
         {
             controller.PlaceShip(coordinate);
         }
+        else if (mode == "attack")
+        {
+
+        }
     }
 
     public void SetDisabled()
@@ -72,19 +76,31 @@ public class MapView : MonoBehaviour
 		maxCoordinate = new Vector3Int(size - 1, size - 1, 0);
 	}
 
+    public void SetAttackMode()
+    {
+        mode = "attack";
+        cursorTile = cursorTiles[6];
+        minCoordinate = new Vector3Int(0, size, 0);
+        maxCoordinate = new Vector3Int(size - 1, size + size - 1, 0);
+    }
+
     public void SetShipCursor(ShipType shipType, bool horizontal)
     {
-        Debug.Log(shipType + ", " + horizontal);
-
-        int index = (int)shipType * 2 + (horizontal ? 0 : 1);
+        int index = ((int)shipType-1) * 2 + (horizontal ? 0 : 1);
         cursorTile = cursorTiles[index];
     }
 
-    public void SetShip(ShipType shipType, Vector3Int coordinate)
+    public void SetDebugTile(Vector3Int coordinate, Tile tile)
     {
-        int index = (int)shipType * 2;
-        Tile tile = cursorTiles[index];
+        debugLayer.SetTile(coordinate, tile);
+    }
 
+    public void SetShip(ShipType shipType, Vector3Int coordinate, bool horizontal)
+    {
+        Debug.Log("placing ship " + shipType + " at " + coordinate + " facing horz " + horizontal);
+
+        int index = ((int)shipType-1) * 2 + (horizontal ? 0 : 1);
+        Tile tile = cursorTiles[index];
         fleetLayer.SetTile(coordinate, tile);
     }
 }
