@@ -32,8 +32,8 @@ public class GameSceneController : MonoBehaviour
 
     void Start()
     {
-        BeginShipPlacement();
-        //StartTurn();
+        //BeginShipPlacement();
+        StartTurn();
         cellCount = mapSize * mapSize;
         placement = new int[cellCount];
 
@@ -70,7 +70,11 @@ public class GameSceneController : MonoBehaviour
 
     public void TakeTurn(Vector3Int coordinate)
     {
+        // TODO: check if we've already targeting this cell - or let player be stupid? I guess you could in be stupid in the boardgame too so let's leave it
+        // TODO: send to server, wait for response
 
+        mapView.SetMarker(coordinate, Marker.Miss, true);
+        mapView.SetMarker(coordinate, Marker.Hit, false);
     }
 
     public void ShowResult()

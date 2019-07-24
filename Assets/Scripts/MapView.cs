@@ -11,12 +11,20 @@ public enum ShipType
     Carrier
 }
 
+public enum Marker
+{
+    Target = 6,
+    Hit = 7,
+    Miss = 8
+}
+
 public class MapView : MonoBehaviour
 {
     public GameSceneController controller;
     public Tilemap cursorLayer;
     public Tilemap fleetLayer;
     public Tilemap debugLayer;
+    public Tilemap markerLayer;
 	public Tile[] cursorTiles;
     public Tile cursorTile;
     public int size = 8;
@@ -59,7 +67,8 @@ public class MapView : MonoBehaviour
         }
         else if (mode == "attack")
         {
-
+            // outside thinks coordinates are 0,0 based
+            controller.TakeTurn(coordinate - new Vector3Int(0, size, 0));
         }
     }
 
@@ -79,9 +88,19 @@ public class MapView : MonoBehaviour
     public void SetAttackMode()
     {
         mode = "attack";
-        cursorTile = cursorTiles[6];
+        cursorTile = cursorTiles[(int)Marker.Target];
         minCoordinate = new Vector3Int(0, size, 0);
         maxCoordinate = new Vector3Int(size - 1, size + size - 1, 0);
+    }
+
+    public void SetMarker(Vector3Int coordinate, Marker marker, bool radar)
+    {
+        if (radar)
+        {
+            coordinate += new Vector3Int(0, size, 0); // normalize position
+        }
+
+        fleetLayer.SetTile(coordinate, cursorTiles[(int)marker]);
     }
 
     public void SetShipCursor(ShipType shipType, bool horizontal)
