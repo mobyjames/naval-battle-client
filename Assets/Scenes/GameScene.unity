@@ -2236,6 +2236,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   mapView: {fileID: 703918001}
   message: {fileID: 1412561016}
+  rotateShipButton: {fileID: 2063235687}
   debugTile: {fileID: 11400000, guid: 4172b8f186e8643e69d2f476f04fb5d4, type: 2}
   mapSize: 8
 --- !u!4 &1248257611

@@ -13,10 +13,36 @@ public class GameClient : GenericSingleton<GameClient>
     public EventHandler OnJoin;
     public EventHandler<State> OnInitialState;
     public EventHandler<object> OnMessage;
+    public EventHandler<string> OnGamePhaseChange;
 
     private Client client;
     private Room<State> room;
     private bool initialStateReceived = false;
+
+    public string ClientId
+    {
+        get { return client?.Id; }
+    }
+
+    public string SessionId
+    {
+        get { return room?.SessionId; }
+    }
+
+    public bool Connected
+    {
+        get { return ClientId != null; }
+    }
+
+    public State State
+    {
+        get { return room?.State; }
+    }
+
+    public bool Joined
+    {
+        get { return room != null && room.Connection.IsOpen; }
+    }
 
     void OnDestroy()
     {
@@ -46,6 +72,22 @@ public class GameClient : GenericSingleton<GameClient>
         room.OnMessage += OnMessageHandler;
         room.OnJoin += OnJoinHandler;
         room.OnStateChange += OnRoomStateChangeHandler;
+    }
+
+    public void Leave()
+    {
+        if (room != null) room.Leave();
+        room = null;
+    }
+
+    public void SendPlacement(int[] placement)
+    {
+        room.Send(new { command = "place", placement });
+    }
+
+    public void SendTurn(int targetIndex)
+    {
+        room.Send(new { command = "turn", targetIndex });
     }
 
     IEnumerator ConnectAndListen()
@@ -98,7 +140,12 @@ public class GameClient : GenericSingleton<GameClient>
 
         foreach (var change in e.Changes)
         {
-            Debug.Log(change.Field + " changed to " + change.Value);
+            //Debug.Log(change.Field + " changed to " + change.Value);
+
+            if (change.Field == "phase")
+            {
+                OnGamePhaseChange?.Invoke(this, (string)change.Value);
+            }
         }
     }
 

@@ -10,31 +10,63 @@ public class ConnectingSceneController : MonoBehaviour
 {
     public Text message;
 
-    // Start is called before the first frame update
+    private GameClient client;
+
     void Start()
     {
         message.text = "Connecting...";
 
-        GameClient.Instance.OnConnect += OnConnect;
-        GameClient.Instance.OnJoin += OnJoin;
-        GameClient.Instance.Connect();
+        client = GameClient.Instance;
+
+        client.OnConnect += OnConnect;
+        client.OnJoin += OnJoin;
+
+        if (!client.Connected)
+        {
+            client.Connect();
+        }
+        else
+        {
+            OnConnect(this, null);
+        }
     }
 
     void OnConnect(object sender, EventArgs e)
     {
         message.text = "Finding a game...";
 
-        GameClient.Instance.Join();
+        if (!client.Joined)
+        {
+            client.Join();
+        }
+        else
+        {
+            OnJoin(this, null);
+        }
     }
 
     void OnJoin(object sender, EventArgs e)
     {
         message.text = "Joined! Finding another player...";
+
+        client.OnGamePhaseChange += GamePhaseChangeHandler;
+    }
+
+    private void GamePhaseChangeHandler(object sender, string phase)
+    {
+        if (phase == "place")
+        {
+            SceneManager.LoadScene("GameScene");
+        }
     }
 
     private void OnDestroy()
     {
-        GameClient.Instance.OnConnect -= OnConnect;
-        GameClient.Instance.OnJoin -= OnJoin;
+        if (client != null)
+        {
+            client.OnConnect -= OnConnect;
+            client.OnJoin -= OnJoin;
+            client.OnGamePhaseChange -= GamePhaseChangeHandler;
+        }
     }
 }
