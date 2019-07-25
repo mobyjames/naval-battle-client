@@ -315,7 +315,7 @@ GameObject:
   - component: {fileID: 1025586301}
   - component: {fileID: 1025586300}
   m_Layer: 5
-  m_Name: Image
+  m_Name: Background
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -389,7 +389,7 @@ GameObject:
   - component: {fileID: 1275193584}
   - component: {fileID: 1275193583}
   m_Layer: 5
-  m_Name: Text
+  m_Name: Message
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

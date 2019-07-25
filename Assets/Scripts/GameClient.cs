@@ -90,30 +90,15 @@ public class GameClient : GenericSingleton<GameClient>
         room.Send(new { command = "turn", targetIndex });
     }
 
-    IEnumerator ConnectAndListen()
-    {
-        yield return StartCoroutine(client.Connect());
-
-        while (true)
-        {
-            client.Recv();
-            yield return 0;
-        }
-    }
-
     // handlers
 
     void OnOpenHandler(object sender, EventArgs e)
     {
-        Debug.Log("Connected to server. Client id: " + client.Id);
-
         OnConnect?.Invoke(this, e);
     }
 
     void OnCloseHandler(object sender, EventArgs e)
     {
-        Debug.Log("Disconnected from server.");
-
         OnClose?.Invoke(this, e);
     }
 
@@ -128,7 +113,6 @@ public class GameClient : GenericSingleton<GameClient>
     {
         if (e.IsFirstState && !initialStateReceived)
         {
-            Debug.Log("Received initial state " + e.State.phase);
             initialStateReceived = true;
             OnInitialState?.Invoke(this, e.State);
         }
@@ -140,8 +124,6 @@ public class GameClient : GenericSingleton<GameClient>
 
         foreach (var change in e.Changes)
         {
-            //Debug.Log(change.Field + " changed to " + change.Value);
-
             if (change.Field == "phase")
             {
                 OnGamePhaseChange?.Invoke(this, (string)change.Value);
@@ -154,5 +136,16 @@ public class GameClient : GenericSingleton<GameClient>
         var message = e.Message;
 
         OnMessage?.Invoke(this, message);
+    }
+
+    IEnumerator ConnectAndListen()
+    {
+        yield return StartCoroutine(client.Connect());
+
+        while (true)
+        {
+            client.Recv();
+            yield return 0;
+        }
     }
 }

@@ -67,7 +67,7 @@ public class MapView : MonoBehaviour
         }
         else if (mode == "attack")
         {
-            // outside thinks coordinates are 0,0 based
+            // outside code thinks coordinates are 0, 0 based
             controller.TakeTurn(coordinate - new Vector3Int(0, size, 0));
         }
     }
@@ -103,7 +103,7 @@ public class MapView : MonoBehaviour
     {
         if (radar)
         {
-            coordinate += new Vector3Int(0, size, 0); // normalize position
+            coordinate += new Vector3Int(0, size, 0); // offset position
         }
 
         markerLayer.SetTile(coordinate, cursorTiles[(int)marker]);
@@ -122,8 +122,6 @@ public class MapView : MonoBehaviour
 
     public void SetShip(ShipType shipType, Vector3Int coordinate, bool horizontal)
     {
-        Debug.Log("placing ship " + shipType + " at " + coordinate + " facing horz " + horizontal);
-
         int index = ((int)shipType-1) * 2 + (horizontal ? 0 : 1);
         Tile tile = cursorTiles[index];
         fleetLayer.SetTile(coordinate, tile);

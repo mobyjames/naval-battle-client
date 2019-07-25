@@ -17,9 +17,7 @@ public class GameSceneController : MonoBehaviour
     public MapView mapView;
     public Text message;
     public Button rotateShipButton;
-    public Tile debugTile;
     public int mapSize = 8;
-    public bool debugMode = false;
 
     private bool _placeShipHorizontally;
     public bool placeShipHorizontally
@@ -61,7 +59,7 @@ public class GameSceneController : MonoBehaviour
         client.OnGamePhaseChange += GamePhaseChangeHandler;
         client.OnClose += CloseHandler;
 
-        // hmm... Rx?
+        // hmm... could use a behavior subject instead...
         if (client.State != null)
         {
             InitialStateHandler(this, client.State);
@@ -89,8 +87,6 @@ public class GameSceneController : MonoBehaviour
         state = initialState;
 
         myPlayerNumber = state.player1 == client.SessionId ? 1 : 2;
-
-        Debug.Log("I am player " + myPlayerNumber);
 
         state.OnChange += StateChangeHandler;
         state.player1Shots.OnChange += ShotsChangedPlayer1;
@@ -147,7 +143,7 @@ public class GameSceneController : MonoBehaviour
         mapView.SetDisabled();
     }
 
-    public void WaitForOpponent()
+    public void WaitForOpponentTurn()
     {
         mapView.SetDisabled();
         message.text = "Waiting for opponent...";
@@ -161,11 +157,7 @@ public class GameSceneController : MonoBehaviour
 
     public void TakeTurn(Vector3Int coordinate)
     {
-        // TODO: check if we've already targeting this cell - or let player be stupid? I guess you could in be stupid in the boardgame too so let's leave it
-        // TODO: send to server, wait for response
-
-        //mapView.SetMarker(coordinate, Marker.Miss, true);
-        //mapView.SetMarker(coordinate, Marker.Hit, false);
+        // could check if already targeted this cell, but we'll allow stupidity
 
         int targetIndex = coordinate.y * mapSize + coordinate.x;
         client.SendTurn(targetIndex);
@@ -222,12 +214,15 @@ public class GameSceneController : MonoBehaviour
         shipWidth = placeShipHorizontally ? size : 1;
         shipHeight = placeShipHorizontally ? 1 : size;
 
-        if (coordinate.x < 0 || coordinate.x + (shipWidth - 1) >= mapSize || coordinate.y - (shipHeight - 1) < 0)
+        // check map bounds
+        if (coordinate.x < 0 ||
+            coordinate.x + (shipWidth - 1) >= mapSize ||
+            coordinate.y - (shipHeight - 1) < 0)
         {
-            Debug.Log("out of bounds: " + coordinate);
             return;
         }
 
+        // check for overlap
         for (var i = 0; i < size; i++)
         {
             if (placeShipHorizontally)
@@ -240,6 +235,7 @@ public class GameSceneController : MonoBehaviour
             }
         }
 
+        // "fill in" the spaces
         for (var i = 0; i < size; i++)
         {
             if (placeShipHorizontally)
@@ -252,6 +248,7 @@ public class GameSceneController : MonoBehaviour
             }
         }
 
+        // show it on the map
         mapView.SetShip(shipType, coordinate, placeShipHorizontally);
         shipsPlaced++;
         UpdateCursor();
@@ -276,21 +273,10 @@ public class GameSceneController : MonoBehaviour
         int cellIndex = coordinate.y * mapSize + coordinate.x;
 
         if (cellIndex < 0 || cellIndex >= cellCount) return false;
-
-        if (placement[cellIndex] > 0)
-        {
-            Debug.Log("overlap: " + coordinate + ", index: " + cellIndex);
-            return false;
-        }
-
+        if (placement[cellIndex] > 0) return false;
         if (testOnly) return true;
 
         placement[cellIndex] = (int)shipType;
-
-        if (debugMode) // TODO: debug mode?
-        {
-            mapView.SetDebugTile(coordinate, debugTile);
-        }
 
         return true;
     }
@@ -313,8 +299,6 @@ public class GameSceneController : MonoBehaviour
 
     private void GamePhaseChangeHandler(object sender, string phase)
     {
-        Debug.Log("phase change: " + phase);
-
         switch (phase)
         {
             case "waiting":
@@ -340,7 +324,7 @@ public class GameSceneController : MonoBehaviour
         }
         else
         {
-            WaitForOpponent();
+            WaitForOpponentTurn();
         }
     }
 }
