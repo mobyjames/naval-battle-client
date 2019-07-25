@@ -86,7 +86,9 @@ public class GameSceneController : MonoBehaviour
     {
         state = initialState;
 
-        myPlayerNumber = state.player1 == client.SessionId ? 1 : 2;
+        Player me = state.players[client.SessionId];
+
+        myPlayerNumber = me != null ? me.seat : -1;
 
         state.OnChange += StateChangeHandler;
         state.player1Shots.OnChange += ShotsChangedPlayer1;
