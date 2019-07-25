@@ -14,8 +14,8 @@ public class State : Schema {
 	[Type(1, "int16")]
 	public short playerTurn = 0;
 
-	[Type(2, "number")]
-	public float winningPlayer = 0;
+	[Type(2, "int16")]
+	public short winningPlayer = 0;
 
 	[Type(3, "string")]
 	public string player1 = "";

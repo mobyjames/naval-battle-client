@@ -93,6 +93,12 @@ public class MapView : MonoBehaviour
         maxCoordinate = new Vector3Int(size - 1, size + size - 1, 0);
     }
 
+    public void SetMarker(int index, Marker marker, bool radar)
+    {
+        Vector3Int coordinate = new Vector3Int(index % size, Mathf.FloorToInt(index / size), 0);
+        SetMarker(coordinate, marker, radar);
+    }
+
     public void SetMarker(Vector3Int coordinate, Marker marker, bool radar)
     {
         if (radar)
@@ -100,7 +106,7 @@ public class MapView : MonoBehaviour
             coordinate += new Vector3Int(0, size, 0); // normalize position
         }
 
-        fleetLayer.SetTile(coordinate, cursorTiles[(int)marker]);
+        markerLayer.SetTile(coordinate, cursorTiles[(int)marker]);
     }
 
     public void SetShipCursor(ShipType shipType, bool horizontal)

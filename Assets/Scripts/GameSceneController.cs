@@ -19,6 +19,7 @@ public class GameSceneController : MonoBehaviour
     public Button rotateShipButton;
     public Tile debugTile;
     public int mapSize = 8;
+    public bool debugMode = false;
 
     private bool _placeShipHorizontally;
     public bool placeShipHorizontally
@@ -111,12 +112,16 @@ public class GameSceneController : MonoBehaviour
         }
     }
 
-    private void ShotsChangedPlayer1(object sender, Colyseus.Schema.KeyValueEventArgs<short, int> changes)
+    private void ShotsChangedPlayer1(object sender, Colyseus.Schema.KeyValueEventArgs<short, int> change)
     {
+        Marker marker = change.Value == 1 ? Marker.Hit : Marker.Miss;
+        mapView.SetMarker(change.Key, marker, myPlayerNumber == 1);
     }
 
-    private void ShotsChangedPlayer2(object sender, Colyseus.Schema.KeyValueEventArgs<short, int> changes)
+    private void ShotsChangedPlayer2(object sender, Colyseus.Schema.KeyValueEventArgs<short, int> change)
     {
+        Marker marker = change.Value == 1 ? Marker.Hit : Marker.Miss;
+        mapView.SetMarker(change.Key, marker, myPlayerNumber == 2);
     }
 
     private void CloseHandler(object sender, object args)
@@ -169,7 +174,15 @@ public class GameSceneController : MonoBehaviour
     public void ShowResult()
     {
         mapView.SetDisabled();
-        message.text = "The winner is player " + state.winningPlayer;
+
+        if (myPlayerNumber == state.winningPlayer)
+        {
+            message.text = "You win!";
+        }
+        else
+        {
+            message.text = "You lost :(";
+        }
     }
 
     public void RotateShip()
@@ -274,7 +287,7 @@ public class GameSceneController : MonoBehaviour
 
         placement[cellIndex] = (int)shipType;
 
-        if (true) // TODO: debug mode?
+        if (debugMode) // TODO: debug mode?
         {
             mapView.SetDebugTile(coordinate, debugTile);
         }
